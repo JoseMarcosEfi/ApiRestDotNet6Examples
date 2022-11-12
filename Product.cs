@@ -8,3 +8,4 @@ public class Product
     public Category Category { get; set; }
     public List<Tag> Tags { get; set; }
 }
+

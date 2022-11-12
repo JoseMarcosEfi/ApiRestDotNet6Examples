@@ -13,10 +13,18 @@ ProductRepository.Init(configuration);
 
 //PADRÃO REST
 //CREATE
-app.MapPost("/products", (Product product) =>
+app.MapPost("/products", (ProductRequest productRequest, ApplicationDbContext context) =>
 {
-    ProductRepository.Add(product);
-    return Results.Created($"/products/{product.Code}", product.Code);
+    var category = context.Categories.Where(c => c.Id == productRequest.CategoryId).First();
+    var product = new Product
+    {
+        Code = productRequest.Code,
+        Name = productRequest.Name,
+        Description = productRequest.Description,
+        Category = category
+    };
+    context.Products.Add(product);
+    return Results.Created($"/products/{product.Id}", product.Id);
 });
 
 //READ
