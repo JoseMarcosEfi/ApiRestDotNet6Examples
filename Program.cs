@@ -24,6 +24,8 @@ app.MapPost("/products", (ProductRequest productRequest, ApplicationDbContext co
         Category = category
     };
     context.Products.Add(product);
+    //NUNCA ESQUECER ESSA PARADA
+    context.SaveChanges();
     return Results.Created($"/products/{product.Id}", product.Id);
 });
 
