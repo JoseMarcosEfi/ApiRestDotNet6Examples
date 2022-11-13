@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSqlServer<ApplicationDbContext>(builder.Configuration["Database:SqlServer"]);
@@ -23,6 +23,14 @@ app.MapPost("/products", (ProductRequest productRequest, ApplicationDbContext co
         Description = productRequest.Description,
         Category = category
     };
+    if (productRequest.Tags != null)
+    {
+        product.Tags = new List<Tag>();
+        foreach (var item in productRequest.Tags)
+        {
+            product.Tags.Add(new Tag { Name = item });
+        }
+    }
     context.Products.Add(product);
     //NUNCA ESQUECER ESSA PARADA
     context.SaveChanges();
@@ -31,9 +39,12 @@ app.MapPost("/products", (ProductRequest productRequest, ApplicationDbContext co
 
 //READ
 
-app.MapGet("/products/{code}", ([FromRoute] string code) =>
+app.MapGet("/products/{id}", ([FromRoute] int id, ApplicationDbContext context) =>
 {
-    var product = ProductRepository.GetBy(code);
+    var product = context.Products
+    .Include(p => p.Category)
+    .Include(p => p.Tags)
+    .Where(p => p.Id == id).First();
     if (product != null)
         return Results.Ok(product);
     return Results.NotFound();
